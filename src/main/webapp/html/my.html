@@ -1,11 +1,102 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <title>RPG</title>
-    <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
+    <meta charset="UTF-8">
     <link href="/css/my.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <h1>RPG admin panel</h1>
 
+<table id="getListPlayers" class ="textTbl">
+    <thead class = "headTbl">
+    <tr class="rTr">
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+    </tr>
+    </thead>
+    <tbody class ="bodyTbl">
+    </tbody>
+</table>
+<div class="pagination" id="pagination">
+    <button id="prevPage" onclick="prevPage()">Previous</button>
+    <ul>
+        <li ><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+        <li><a href="#">4</a></li>
+        <li><a href="#">5</a></li>
+        <li><a href="#">&raquo;</a></li>
+    </ul>
+    <button id="nextPage" onclick="nextPage()">Next</button>
+</div>
+<script>
+    let currentPage = 1;
+    const itemsPerPage = 3;
+
+    function fetchData(page = 1) {
+        fetch(`/rest/players?page=${page}&size=${itemsPerPage}`)
+//        console.log("asdasfsdghksjah",page)
+        .then(response => {
+            if(!response.ok){
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const tableBody = document.querySelector('#getListPlayers tbody');
+            tableBody.innerHTML = '';
+            data.forEach(player => {
+                const row = `
+                <tr>
+                    <td>${player.id}</td>
+                    <td>${player.name}</td>
+                    <td>${player.title}</td>
+                    <td>${player.race}</td>
+                    <td>${player.profession}</td>
+                    <td>${player.level}</td>
+                    <td>${player.birthday}</td>
+                    <td>${player.banned}</td>
+                </tr>
+                `;
+    tableBody.insertAdjacentHTML('beforeend',row);
+            });
+    updatePaginationButtons(data.length);
+        })
+    .catch(error => {
+    console.error('Error receiving data: ',error);
+    console.error( error.message);
+    });
+    }
+
+    function updatePaginationButtons(itemsFetched) {
+        const prevButton = document.getElementById('prevPage');
+        const nextButton = document.getElementById ('nextPage');
+
+        prevButton.disabled =currentPage === 1;
+        nextButton.disabled = itemsFetched < itemsPerPage;
+    }
+
+
+    function prevPage() {
+        if(currentPage > 1){
+            currentPage--;
+            fetchData(currrentPage);
+        }
+    }
+
+    function nextPage(){
+        currentPage++;
+        fetchData(currentPage);
+    }
+    fetchData(currentPage);
+</script>
 </body>
 </html>
