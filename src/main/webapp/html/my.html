@@ -40,6 +40,7 @@
     <tbody>
     </tbody>
 </table>
+
 <div class="pagination" id="pagination"></div>
 
 <script>
@@ -58,7 +59,7 @@
             .then(data => {
             totalItems = data;
             updatePaginationButtons();
-            fetchData(currentPage);
+            fetchData(currentPage, itemsPerPage);
         })
             .catch(error => {
             console.error('Error fetching total items: ', error);
@@ -88,13 +89,12 @@
                     <td>${player.level}</td>
                     <td>${new Date(player.birthday).toLocaleDateString()}</td>
                     <td>${player.banned}</td>
-                    <td class="button-cell"><button class="buttonIcon"><img src="/img/edit.png" alt="Edit" onclick="editPlayer(${player.id})"></button></td>
-                    <td class="button-cell"><button class="buttonIcon"><img src="/img/delete.png" alt="Delete" onclick="deletePlayer(${player.id})"></button></td>
-                </tr>
+                    <td class="button-cell"><button class="buttonIcon" onclick="editPlayer(${player.id}, this)"><img src="/img/edit.png" alt="Edit"></button></td>
+                    <td class="button-cell"><button class="buttonIcon" onclick="deletePlayer(${player.id})"><img src="/img/delete.png" alt="Delete"></button></td>                </tr>
                 `;
                 tableBody.insertAdjacentHTML('beforeend', row);
             });
-            updatePaginationButtons(data.totalPages);
+            updatePaginationButtons();
         })
             .catch(error => {
             console.error('Error receiving data: ', error);
@@ -110,14 +110,13 @@
         paginationContainer.appendChild(lable);
 
         const totalPages = Math.ceil(totalItems / itemsPerPage);
-
         if(totalPages > 1){
             for (let i = 1; i <= totalPages; i++) {
                 const button = document.createElement('button');
                 button.textContent = i;
                 button.onclick = () => {
                     currentPage = i;
-                    fetchData(currentPage);
+                    fetchData(currentPage, itemsPerPage);
                     setActivePageButton(i);
                 };
 
@@ -146,6 +145,7 @@
         const select = document.getElementById('itemsPerPage');
         itemsPerPage = parseInt(select.value);
         currentPage = 1;
+        fetchTotalItems();
     }
 
     function deletePlayer(id) {
@@ -156,19 +156,53 @@
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            fetchData(currentPage);
+            fetchData(currentPage, itemsPerPage);
         })
             .catch(error => {
             console.error('Error deleting player:', error);
         });
     }
 
-    function editPlayer(id) {
-        console.log(`Edit player with id: ${id}`);
-    }
+    function editPlayer(id, button) {
+        const row = button.closest('tr');
+        const editButton = row.querySelector('button.buttonIcon');
+        const deleteButton = row.querySelector('button.buttonIcon + button.buttonIcon');
 
+        if (editButton.getAttribute('data-editing') === 'true') {
+            // Save functionality
+            console.log(`Save player with id: ${id}`);
+            editButton.querySelector('img').src = '/img/edit.png';
+            editButton.setAttribute('data-editing', 'false');
+            deleteButton.style.display = 'inline-block';
+            // Implement save functionality if required
+        } else {
+            // Edit functionality
+            console.log(`Edit player with id: ${id}`);
+            editButton.querySelector('img').src = '/img/save.png';
+            editButton.setAttribute('data-editing', 'true');
+            deleteButton.style.display = 'none';
+            // Implement editing functionality if required
+        }
+    }
     fetchTotalItems();
 
+//    document.addEventListener('DOMContentLoaded', () => {
+//        const itemsPerPageSelect = document.createElement('select');
+//        itemsPerPageSelect.id = 'itemsPerPage';
+//        for (let i = 3; i <= 20; i++) {
+//            const option = document.createElement('option');
+//            option.value = i;
+//            option.textContent = i;
+//            if (i === itemsPerPage) {
+//                option.selected = true;
+//            }
+//            itemsPerPageSelect.appendChild(option);
+//        }
+//        itemsPerPageSelect.onchange = changeItemsPerPage;
+//
+//        document.body.insertBefore(itemsPerPageSelect, document.getElementById('pagination'));
+//        fetchTotalItems();
+//    });
 </script>
 </body>
 </html>
