@@ -6,12 +6,24 @@
     <link href="/css/my.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!--    <script defer src="/javaScript/my.js"></script>-->
 </head>
 <body>
 <h1>RPG admin panel</h1>
+<h2>Accounts list:</h2>
 
-<table id="getListPlayers" class ="textTbl">
-    <thead class = "headTbl">
+<div>
+    <label for="itemsPerPage">Count per page:</label>
+    <select id="itemsPerPage" onchange="changeItemsPerPage()">
+        <option value="3">3</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+    </select>
+</div>
+
+<table id="getListPlayers">
+    <thead>
     <tr class="rTr">
         <th>#</th>
         <th>Name</th>
@@ -21,38 +33,50 @@
         <th>Level</th>
         <th>Birthday</th>
         <th>Banned</th>
+        <th>Edit</th>
+        <th>Delete</th>
     </tr>
     </thead>
-    <tbody class ="bodyTbl">
+    <tbody>
     </tbody>
 </table>
-<div class="pagination" id="pagination">
-    <button id="prevPage" onclick="prevPage()">Previous</button>
-    <ul>
-        <li ><a href="#">2</a></li>
-        <li><a href="#">3</a></li>
-        <li><a href="#">4</a></li>
-        <li><a href="#">5</a></li>
-        <li><a href="#">&raquo;</a></li>
-    </ul>
-    <button id="nextPage" onclick="nextPage()">Next</button>
-</div>
+<div class="pagination" id="pagination"></div>
+
 <script>
     let currentPage = 1;
-    const itemsPerPage = 3;
+    let itemsPerPage = 3;
+    let totalItems = 0;
 
-    function fetchData(page = 1) {
-        fetch(`/rest/players?page=${page}&size=${itemsPerPage}`)
-//        console.log("asdasfsdghksjah",page)
-        .then(response => {
-            if(!response.ok){
+    function fetchTotalItems() {
+        fetch('/rest/players/count')
+            .then(response => {
+            if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             return response.json();
         })
-        .then(data => {
+            .then(data => {
+            totalItems = data;
+            updatePaginationButtons();
+            fetchData(currentPage);
+        })
+            .catch(error => {
+            console.error('Error fetching total items: ', error);
+        });
+    }
+
+    function fetchData(page = 1) {
+        fetch(`/rest/players?pageNumber=${page - 1}&pageSize=${itemsPerPage}`)
+            .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+            .then(data => {
             const tableBody = document.querySelector('#getListPlayers tbody');
             tableBody.innerHTML = '';
+
             data.forEach(player => {
                 const row = `
                 <tr>
@@ -62,41 +86,89 @@
                     <td>${player.race}</td>
                     <td>${player.profession}</td>
                     <td>${player.level}</td>
-                    <td>${player.birthday}</td>
+                    <td>${new Date(player.birthday).toLocaleDateString()}</td>
                     <td>${player.banned}</td>
+                    <td class="button-cell"><button class="buttonIcon"><img src="/img/edit.png" alt="Edit" onclick="editPlayer(${player.id})"></button></td>
+                    <td class="button-cell"><button class="buttonIcon"><img src="/img/delete.png" alt="Delete" onclick="deletePlayer(${player.id})"></button></td>
                 </tr>
                 `;
-    tableBody.insertAdjacentHTML('beforeend',row);
+                tableBody.insertAdjacentHTML('beforeend', row);
             });
-    updatePaginationButtons(data.length);
+            updatePaginationButtons(data.totalPages);
         })
-    .catch(error => {
-    console.error('Error receiving data: ',error);
-    console.error( error.message);
-    });
+            .catch(error => {
+            console.error('Error receiving data: ', error);
+        });
     }
 
-    function updatePaginationButtons(itemsFetched) {
-        const prevButton = document.getElementById('prevPage');
-        const nextButton = document.getElementById ('nextPage');
+    function updatePaginationButtons() {
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = '';
 
-        prevButton.disabled =currentPage === 1;
-        nextButton.disabled = itemsFetched < itemsPerPage;
-    }
+        const lable = document.createElement('lable');
+        lable.textContent = 'Pages: ';
+        paginationContainer.appendChild(lable);
 
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-    function prevPage() {
-        if(currentPage > 1){
-            currentPage--;
-            fetchData(currrentPage);
+        if(totalPages > 1){
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.onclick = () => {
+                    currentPage = i;
+                    fetchData(currentPage);
+                    setActivePageButton(i);
+                };
+
+                if (i === currentPage) {
+                    button.classList.add('active');
+                }
+
+                paginationContainer.appendChild(button);
+            }
         }
     }
 
-    function nextPage(){
-        currentPage++;
-        fetchData(currentPage);
+    function setActivePageButton(activePage) {
+        const paginationContainer = document.getElementById('pagination');
+        const buttons = paginationContainer.querySelectorAll('button');
+        buttons.forEach(button => {
+            if (parseInt(button.textContent) === activePage) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
     }
-    fetchData(currentPage);
+
+    function changeItemsPerPage() {
+        const select = document.getElementById('itemsPerPage');
+        itemsPerPage = parseInt(select.value);
+        currentPage = 1;
+    }
+
+    function deletePlayer(id) {
+        fetch(`/rest/players/${id}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            fetchData(currentPage);
+        })
+            .catch(error => {
+            console.error('Error deleting player:', error);
+        });
+    }
+
+    function editPlayer(id) {
+        console.log(`Edit player with id: ${id}`);
+    }
+
+    fetchTotalItems();
+
 </script>
 </body>
 </html>
