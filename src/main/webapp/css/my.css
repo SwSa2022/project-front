@@ -1,51 +1,117 @@
-#getListPlayers {
-    border-collapse: collapse;
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+table {
     width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
 }
 
-#getListPlayers th, #getListPlayers td {
+table, th, td {
     border: 1px solid black;
-    padding: 8px;
-/*    text-align: left;*/
 }
 
-#getListPlayers th {
-    text-align: center;
-    background-color: #f2f2f2;
-}
-
-#getListPlayers td {
+th, td {
+    padding: 10px;
     text-align: left;
 }
 
-#getListPlayers td.button-cell {
+th {
+    background-color: #f2f2f2;
+}
+
+button {
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+button.active {
+    background-color: #faf2f2;
+    color: green;
+}
+
+.button-cell {
     text-align: center;
 }
 
-.buttonIcon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-}
-.buttonIcon img {
-    display: block;
-    margin: 0 auto;
+button.buttonIcon img, button.buttonIconDel img {
+    width: 20px;
+    height: 20px;
 }
 
-.pagination {
-    display: flex;
-    justify-tracks: start;
-    justify-tracks: space-between;
-    justify-tracks: center;
-    justify-tracks: start, center, end;
+#pagination {
+    margin-top: 20px;
 }
 
-.pagination lable {
-    margin: 3px 2px;
-    padding: 1px 3px;
-    text-align: right;
+label {
+    font-weight: bold;
+    margin-right: 10px;
 }
+
+
+/*#getListPlayers {*/
+/*    border-collapse: collapse;*/
+/*    width: 100%;*/
+/*}*/
+
+/*#getListPlayers th, #getListPlayers td {*/
+/*    border: 1px solid black;*/
+/*    padding: 8px;*/
+/*    text-align: left;*/
+/*}*/
+
+/*#getListPlayers th {*/
+/*    text-align: center;*/
+/*    background-color: #f2f2f2;*/
+/*}*/
+
+/*#getListPlayers td {*/
+/*    text-align: left;*/
+/*}*/
+
+/*#getListPlayers td.button-cell {*/
+/*    text-align: center;*/
+/*}*/
+
+/*.buttonIcon {*/
+/*    background: none;*/
+/*    border: none;*/
+/*    cursor: pointer;*/
+/*    padding: 5px;*/
+/*}*/
+/*.buttonIconDel {*/
+/*    background: none ;*/
+/*    border: none !important;*/
+/*    cursor: pointer;*/
+/*    padding: 5px;*/
+/*}*/
+
+/*.buttonIconDel img {*/
+/*    display: block;*/
+/*    margin: 0 auto;*/
+/*}*/
+
+/*.buttonIcon img  {*/
+/*    display: block;*/
+/*    margin: 0 auto;*/
+/*}*/
+
+/*.pagination {*/
+/*    display: flex;*/
+/*    justify-tracks: start;*/
+/*    justify-tracks: space-between;*/
+/*    justify-tracks: center;*/
+/*    justify-tracks: start, center, end;*/
+/*}*/
+
+/*.pagination lable {*/
+/*    margin: 3px 2px;*/
+/*    padding: 1px 3px;*/
+/*    text-align: right;*/
+/*}*/
 
 .pagination button {
     margin: 3px 1px;
@@ -55,16 +121,16 @@
     cursor: pointer;
 }
 
-.pagination button:hover {
-    background-color: #f2f2f2;
-}
+/*.pagination button:hover {*/
+/*    background-color: #f2f2f2;*/
+/*}*/
 
 /*.pagination button:disabled {*/
 /*    background-color: #ccc;*/
 /*    cursor: not-allowed;*/
 /*}*/
 
-.pagination button.active {
-    background-color: #6e0202;
-    color: white;
-}
+/*.pagination button.active {*/
+/*    background-color: #6e0202;*/
+/*    color: white;*/
+/*}*/
