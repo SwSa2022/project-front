@@ -21,6 +21,3 @@ export function fetchTotalItems(currentPage, itemsPerPage) {
     });
 }
 
-//export function getTotalItems() {
-//    return totalItems;
-//}

@@ -1,7 +1,6 @@
 import { fetchData } from './fetchData.js';
 import { fetchTotalItems } from './fetchTotalPlayer.js';
 
-
 export function updatePaginationButtons(currentPage, itemsPerPage, totalItems) {
     const paginationContainer = document.getElementById('pagination');
     paginationContainer.innerHTML = '';
