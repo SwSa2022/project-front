@@ -7,12 +7,9 @@ let itemsPerPage = 3;
 
 document.addEventListener('DOMContentLoaded', () => {
     populateDropdowns();
-
     const itemsPerPageSelect = document.getElementById('itemsPerPage');
     itemsPerPageSelect.onchange = () => changeItemsPerPage();
     fetchTotalItems(currentPage, itemsPerPage);
-//    const createPlayerButton = document.getElementById('createPlayerButton');
-//    createPlayerButton.onclick = createPlayer;
 });
 
 export function deletePlayer(id) {
@@ -138,7 +135,7 @@ function createPlayer() {
     const birthdayInput = document.getElementById('createBirthday').value;
     const bannedCheckbox = document.getElementById('createBanned').checked;
 
-    // ?????????, ??? ???????? ????? ????????????? ??????????
+    // Check that form elements actually exist
     if (!nameInput || !titleInput || !raceSelect || !professionSelect || !levelInput || !birthdayInput || !bannedCheckbox) {
         console.error('One or more form elements not found');
         return;
