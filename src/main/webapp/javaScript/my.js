@@ -6,9 +6,13 @@ let currentPage = 1;
 let itemsPerPage = 3;
 
 document.addEventListener('DOMContentLoaded', () => {
+    populateDropdowns();
+
     const itemsPerPageSelect = document.getElementById('itemsPerPage');
     itemsPerPageSelect.onchange = () => changeItemsPerPage();
     fetchTotalItems(currentPage, itemsPerPage);
+//    const createPlayerButton = document.getElementById('createPlayerButton');
+//    createPlayerButton.onclick = createPlayer;
 });
 
 export function deletePlayer(id) {
@@ -35,7 +39,6 @@ export function editPlayer(id, button) {
     if (editButton.getAttribute('data-editing') === 'true') {
         savePlayer(id, row, editButton, deleteButton);
     } else {
-        // Edit functionality
         const cells = row.querySelectorAll('td');
         const nameCell = cells[1];
         const titleCell = cells[2];
@@ -43,7 +46,6 @@ export function editPlayer(id, button) {
         const professionCell = cells[4];
         const bannedCell = cells[7];
 
-        // Convert text content to input fields
         nameCell.innerHTML = `<input type="text" value="${nameCell.textContent}">`;
         titleCell.innerHTML = `<input type="text" value="${titleCell.textContent}">`;
         raceCell.innerHTML = `<input type="text" value="${raceCell.textContent}">`;
@@ -67,14 +69,12 @@ function savePlayer(id, row, editButton, deleteButton) {
     const bannedCell = cells[7];
 
     const updatedPlayer = {
-        name: nameCell.querySelector('input').value.trim(),
-        title: titleCell.querySelector('input').value.trim(),
-        race: raceCell.querySelector('input').value.trim(),
-        profession: professionCell.querySelector('input').value.trim(),
+        name: nameCell.querySelector('input').value,
+        title: titleCell.querySelector('input').value,
+        race: raceCell.querySelector('input').value,
+        profession: professionCell.querySelector('input').value,
         banned: bannedCell.querySelector('input').checked
     };
-
-    console.log('Updated Player:', updatedPlayer);
 
     fetch(`/rest/players/${id}`, {
         method: 'POST',
@@ -85,7 +85,7 @@ function savePlayer(id, row, editButton, deleteButton) {
     })
         .then(response => {
         if (!response.ok) {
-            throw new Error('Network response was not ok: ${errorData.message}');
+            throw new Error(`Network response was not ok: ${response.statusText}`);
         }
         return response.json();
     })
@@ -102,6 +102,111 @@ function savePlayer(id, row, editButton, deleteButton) {
         console.error('Error updating player:', error);
     });
 }
+
+function populateDropdowns() {
+    const races = ['HUMAN', 'DWARF', 'ELF', 'GNOME', 'ORC', 'TROLL'];
+    const professions = ['WARRIOR', 'ROGUE', 'SORCERER', 'CLERIC', 'PALADIN', 'BARD'];
+
+    const raceSelect = document.getElementById('createRace');
+    const professionSelect = document.getElementById('createProfession');
+
+    if (raceSelect && professionSelect) {
+        races.forEach(race => {
+            const option = document.createElement('option');
+            option.value = race;
+            option.textContent = race;
+            raceSelect.appendChild(option);
+        });
+
+        professions.forEach(profession => {
+            const option = document.createElement('option');
+            option.value = profession;
+            option.textContent = profession;
+            professionSelect.appendChild(option);
+        });
+    } else {
+        console.error('Race or Profession dropdown not found');
+    }
+}
+
+function createPlayer() {
+    const nameInput = document.getElementById('createName').value.trim();
+    const titleInput = document.getElementById('createTitle').value.trim();
+    const raceSelect = document.getElementById('createRace').value;
+    const professionSelect = document.getElementById('createProfession').value;
+    const levelInput = parseInt(document.getElementById('createLevel').value, 10);
+    const birthdayInput = document.getElementById('createBirthday').value;
+    const bannedCheckbox = document.getElementById('createBanned').checked;
+
+    // ?????????, ??? ???????? ????? ????????????? ??????????
+    if (!nameInput || !titleInput || !raceSelect || !professionSelect || !levelInput || !birthdayInput || !bannedCheckbox) {
+        console.error('One or more form elements not found');
+        return;
+    }
+
+    if (nameInput.length === 0 || nameInput.length > 12) {
+        alert('Name must be between 1 and 12 characters.');
+        return;
+    }
+
+    if (titleInput.length === 0 || titleInput.length > 30) {
+        alert('Title must be between 1 and 30 characters.');
+        return;
+    }
+
+    if (isNaN(levelInput) || levelInput < 0 || levelInput > 100) {
+        alert('Level must be between 0 and 100.');
+        return;
+    }
+
+    if (!birthdayInput) {
+        alert('Birthday must be a valid date.');
+        return;
+    }
+
+    const newPlayer = {
+        name: nameInput,
+        title: titleInput,
+        race: raceSelect,
+        profession: professionSelect,
+        level: levelInput,
+        birthday: new Date(birthdayInput).getTime(),
+        banned: bannedCheckbox
+    };
+
+    console.log('Creating Player:', newPlayer);
+
+    fetch('/rest/players', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newPlayer)
+    })
+        .then(response => {
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+        return response.json();
+    })
+        .then(data => {
+        console.log('Player created successfully:', data);
+        // Clearing fields after player creation
+        document.getElementById('createName').value = '';
+        document.getElementById('createTitle').value = '';
+        document.getElementById('createRace').value = '';
+        document.getElementById('createProfession').value = '';
+        document.getElementById('createLevel').value = '';
+        document.getElementById('createBirthday').value = '';
+        document.getElementById('createBanned').checked = false;
+        // Updating the list of players
+        fetchData(currentPage, itemsPerPage);
+    })
+        .catch(error => {
+        console.error('Error creating player:', error);
+    });
+}
+
+document.getElementById('createPlayerButton').addEventListener('click', createPlayer);
 window.deletePlayer = deletePlayer;
 window.editPlayer = editPlayer;
-
